@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="multiThreadChatRoom.GenerateInsultTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2020-04-15T01:32:05" hostname="Jiayi-GAO-new" time="0.035">
+  <properties/>
+  <testcase name="readGrammar" classname="multiThreadChatRoom.GenerateInsultTest" time="0.035"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

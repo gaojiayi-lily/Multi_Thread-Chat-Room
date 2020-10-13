@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GenerateInsult.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Assignment 6</a> &gt; <a href="index.source.html" class="el_package">multiThreadChatRoom</a> &gt; <span class="el_source">GenerateInsult.java</span></div><h1>GenerateInsult.java</h1><pre class="source lang-java linenums">package multiThreadChatRoom;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+<span class="nc" id="L14">public class GenerateInsult {</span>
+
+  public static List&lt;String&gt; readGrammar(String filePath) {
+<span class="fc" id="L17">    JSONParser jsonParser = new JSONParser();</span>
+<span class="fc" id="L18">    ArrayList output = new ArrayList();</span>
+
+    try {
+<span class="fc" id="L21">      FileReader reader = new FileReader(filePath);</span>
+
+      try {
+<span class="fc" id="L24">        Object obj = jsonParser.parse(reader);</span>
+<span class="fc" id="L25">        JSONObject grammarInput = (JSONObject) obj;</span>
+<span class="fc" id="L26">        JSONArray grammarStart = (JSONArray) grammarInput.get(&quot;start&quot;);</span>
+<span class="fc" id="L27">        Iterator var7 = grammarStart.iterator();</span>
+
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        while (var7.hasNext()) {</span>
+<span class="fc" id="L30">          Object o = var7.next();</span>
+<span class="fc" id="L31">          String line = (String) o;</span>
+
+<span class="fc bfc" id="L33" title="All 2 branches covered.">          while (line.contains(&quot;&lt;&quot;)) {</span>
+<span class="fc" id="L34">            List&lt;String&gt; allMatches = new ArrayList();</span>
+<span class="fc" id="L35">            Matcher m = Pattern.compile(&quot;(&lt;.+?&gt;)&quot;).matcher(line);</span>
+
+<span class="fc bfc" id="L37" title="All 2 branches covered.">            while (m.find()) {</span>
+<span class="fc" id="L38">              allMatches.add(m.group());</span>
+            }
+
+<span class="fc bfc" id="L41" title="All 2 branches covered.">            for (int j = 0; j &lt; allMatches.size(); ++j) {</span>
+<span class="fc" id="L42">              JSONArray replacement = getIgnoreCase(grammarInput, ((String) allMatches.get(j))</span>
+<span class="fc" id="L43">                  .substring(1, ((String) allMatches.get(j)).length() - 1));</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">              if (replacement == null) {</span>
+<span class="nc" id="L45">                throw new IllegalArgumentException(</span>
+<span class="nc" id="L46">                    &quot;The non-terminal &quot; + (String) allMatches.get(j) + &quot; is not defined.&quot;);</span>
+              }
+
+<span class="fc" id="L49">              line = line.replace((CharSequence) allMatches.get(j),</span>
+<span class="fc" id="L50">                  (String) replacement.get((int) (Math.random() * (double) replacement.size())));</span>
+            }
+<span class="fc" id="L52">          }</span>
+
+<span class="fc" id="L54">          output.add(line);</span>
+<span class="fc" id="L55">        }</span>
+<span class="nc" id="L56">      } catch (Throwable var15) {</span>
+        try {
+<span class="nc" id="L58">          reader.close();</span>
+<span class="nc" id="L59">        } catch (Throwable var14) {</span>
+<span class="nc" id="L60">          var15.addSuppressed(var14);</span>
+<span class="nc" id="L61">        }</span>
+
+<span class="nc" id="L63">        throw var15;</span>
+<span class="fc" id="L64">      }</span>
+
+<span class="fc" id="L66">      reader.close();</span>
+<span class="nc" id="L67">    } catch (ParseException | IllegalArgumentException | IOException var16) {</span>
+<span class="nc" id="L68">      var16.printStackTrace();</span>
+<span class="fc" id="L69">    }</span>
+
+<span class="fc" id="L71">    return output;</span>
+  }
+
+  public static JSONArray getIgnoreCase(JSONObject grammarInput, String key) {
+<span class="fc" id="L75">    Iterator iter = grammarInput.keySet().iterator();</span>
+
+    String keyOutput;
+    do {
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">      if (!iter.hasNext()) {</span>
+<span class="nc" id="L80">        return null;</span>
+      }
+
+<span class="fc" id="L83">      keyOutput = (String) iter.next();</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">    } while (!keyOutput.equalsIgnoreCase(key));</span>
+
+<span class="fc" id="L86">    return (JSONArray) grammarInput.get(keyOutput);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.4.201905082037</span></div></body></html>

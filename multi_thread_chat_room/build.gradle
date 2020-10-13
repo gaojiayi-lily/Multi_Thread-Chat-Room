@@ -1,0 +1,145 @@
+// Helpful links that explain what the gradle file is doing
+
+
+plugins {
+    // Build Java: https://docs.gradle.org/current/userguide/building_java_projects.html
+    id 'java'
+
+    // https://docs.gradle.org/current/userguide/pmd_plugin.html#header
+    id 'pmd'
+
+    // https://docs.gradle.org/current/userguide/jacoco_plugin.html
+    id 'jacoco'
+}
+
+group 'PDPCS5010'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+//create a single Jar with all dependencies
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'multiThreadChatRoom.Server'
+        )
+    }
+    // creates a "fat jar" so that implementation dependencies are added to the jar
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
+    compile 'commons-cli:commons-cli:1.4'
+
+    // Set this dependency if you want to use Apache Commons CLI library
+    // https://mvnrepository.com/artifact/commons-cli/commons-cli/1.4
+    implementation group: 'commons-cli', name: 'commons-cli', version: '1.4'
+
+    // Set this dependency if you want to use Apache Commons IO library
+    // https://mvnrepository.com/artifact/commons-io/commons-io
+    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
+
+    implementation fileTree(dir: 'libs', include: ['Assignment4-1.0-SNAPSHOT.jar'])
+
+}
+
+jacoco {
+    toolVersion = "0.8.4"
+    reportsDir = file("$buildDir/customJacocoReportDir")
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination file("${buildDir}/jacocoHtml")
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                // minimum percentage of code coverage
+                minimum = 0.1
+            }
+        }
+
+        rule {
+            enabled = false
+            element = 'CLASS'
+            includes = ['org.gradle.*']
+
+            limit {
+                counter = 'LINE'
+                value = 'TOTALCOUNT'
+                maximum = 0.3
+            }
+        }
+    }
+}
+
+pmd {
+    ignoreFailures=true
+    pmdTest.enabled=true
+    ruleSets = [
+            "category/java/bestpractices.xml",
+            "category/java/errorprone.xml",
+            "category/java/codestyle.xml"
+            //"java-basic",
+            //"java-braces",
+            //"java-strings",
+    ]
+}
+
+task docs(type: Javadoc) {
+    source = sourceSets.main.allJava
+}
+
+check.dependsOn jacocoTestCoverageVerification
+jacocoTestReport.mustRunAfter test
+
+task doAll {
+    // Runs a java build.  Imported from the java plugin
+    dependsOn build
+
+    // Runs all the tests.  Imported from the java plugin.
+    dependsOn test
+
+    // Runs pmd. Imported by pmd plugin
+    dependsOn check
+
+    // Runs java doc. Imported from the java plugin
+    dependsOn javadoc
+
+    println 'all done!'
+}
+
+task debuggingGradle {
+    dependsOn check
+}
+
+javadoc {
+    doLast {
+        println "file://$buildDir/docs/javadoc/index.html"
+    }
+}
+
+test {
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    doLast {
+        println "file://$buildDir/jacocoHtml/index.html"
+    }
+}

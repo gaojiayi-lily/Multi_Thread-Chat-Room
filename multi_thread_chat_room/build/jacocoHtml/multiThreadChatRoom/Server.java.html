@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Server.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Assignment 6</a> &gt; <a href="index.source.html" class="el_package">multiThreadChatRoom</a> &gt; <span class="el_source">Server.java</span></div><h1>Server.java</h1><pre class="source lang-java linenums">package multiThreadChatRoom;
+
+import java.io.*;
+import java.util.*;
+import java.net.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * The type Server.
+ */
+<span class="nc" id="L12">public class Server {</span>
+
+  /**
+   * The Port.
+   */
+<span class="nc" id="L17">  static int port = 2222;</span>
+  /**
+   * The Client list.
+   */
+<span class="nc" id="L21">  static ConcurrentHashMap&lt;String, ClientThread&gt; clientList = new ConcurrentHashMap&lt;String, ClientThread&gt;(</span>
+      10);
+
+  /**
+   * Process input array list.
+   *
+   * @param received the received
+   * @return the array list
+   */
+  public static ArrayList&lt;String&gt; processInput(String received) {
+    // break the string into parts according to the blank
+<span class="nc" id="L32">    StringTokenizer in = new StringTokenizer(received, &quot; &quot;);</span>
+<span class="nc" id="L33">    ArrayList&lt;String&gt; fromClient = new ArrayList&lt;String&gt;();</span>
+<span class="nc" id="L34">    int t = in.countTokens();</span>
+<span class="nc bnc" id="L35" title="All 2 branches missed.">    for (int i = 0; i &lt; t; i++) {</span>
+<span class="nc" id="L36">      fromClient.add(in.nextToken());</span>
+    }
+<span class="nc" id="L38">    return fromClient;</span>
+  }
+
+  /**
+   * The entry point of application.
+   *
+   * @param args the input arguments
+   * @throws IOException the io exception
+   */
+  public static void main(String[] args) throws IOException {
+    // server is listening on port 2222
+<span class="nc" id="L49">    ServerSocket serverSocket = new ServerSocket(port);</span>
+<span class="nc" id="L50">    System.out.println(&quot;Chat Server is listening on port &quot; + port);</span>
+<span class="nc" id="L51">    Socket clientSocket = null;</span>
+    String received;
+    String clientName;
+    String msg;
+    int chatRmNum;
+
+    // running infinite loop for getting client request
+    while (true) {
+      try {
+        // Accept the incoming request, create input and output streams
+<span class="nc" id="L61">        clientSocket = serverSocket.accept();</span>
+<span class="nc" id="L62">        System.out.println(&quot;New client request received: &quot; + clientSocket);</span>
+<span class="nc" id="L63">        DataInputStream serverIn = new DataInputStream(clientSocket.getInputStream());</span>
+<span class="nc" id="L64">        DataOutputStream serverOut = new DataOutputStream(clientSocket.getOutputStream());</span>
+
+        // Waiting for client input, if no input, then waiting for 1 sec
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        while ((received = serverIn.readUTF()) == null) {</span>
+<span class="nc" id="L68">          TimeUnit.SECONDS.sleep(1);</span>
+        }
+
+        // Check: if ChatRoom is not full, create thread for the client
+        // Otherwise, no thread created, close input/output streams, close socket
+<span class="nc" id="L73">        ArrayList&lt;String&gt; fromClient = processInput(received);</span>
+<span class="nc" id="L74">        clientName = fromClient.get(2);</span>
+<span class="nc" id="L75">        chatRmNum = clientList.size();</span>
+
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        if (fromClient.get(0).equals(&quot;19&quot;)) {</span>
+<span class="nc bnc" id="L78" title="All 4 branches missed.">          if (chatRmNum &lt; 10 &amp;&amp; !(clientList.containsKey(clientName))) {</span>
+<span class="nc" id="L79">            msg = &quot;There are &quot; + chatRmNum + &quot; other connected clients.&quot;;</span>
+<span class="nc" id="L80">            serverOut.writeUTF(&quot;20 true &quot; + msg);</span>
+            //serverOut.writeUTF(&quot;20 true&quot;);
+            //ChatRoom isn't full, create a new ClientThread object for handling this request
+<span class="nc" id="L83">            ClientThread clientThread = new ClientThread(clientSocket, clientName, serverIn,</span>
+                serverOut);
+<span class="nc" id="L85">            Thread t = new Thread(clientThread);</span>
+<span class="nc" id="L86">            clientList.put(clientName, clientThread);</span>
+<span class="nc" id="L87">            t.start();</span>
+<span class="nc" id="L88">            System.out.println(&quot;New client logged in ChatRoom: &quot; + clientName);</span>
+
+
+<span class="nc bnc" id="L91" title="All 4 branches missed.">          } else if (chatRmNum &gt;= 10 &amp;&amp; !(clientList.containsKey(clientName))) {</span>
+<span class="nc" id="L92">            msg = &quot;CharRoom is full. Please try again later.&quot;;</span>
+<span class="nc" id="L93">            serverOut.writeUTF(&quot;20 false &quot; + msg);</span>
+<span class="nc" id="L94">            serverIn.close();</span>
+<span class="nc" id="L95">            serverOut.close();</span>
+<span class="nc" id="L96">            clientSocket.close();</span>
+<span class="nc" id="L97">            System.out.println(&quot;ChatRoom is full. No connection build with &quot; + clientName);</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">          } else if (clientList.containsKey(clientName)) {</span>
+<span class="nc" id="L99">            msg = &quot;ERROR: &quot; + clientName + &quot; already connected to server.&quot;;</span>
+<span class="nc" id="L100">            serverOut.writeUTF(&quot;20 true &quot; + msg);</span>
+          }
+        } else {
+<span class="nc" id="L103">          msg = &quot;26 ERROR: Wrong connection code. Please try again.&quot;;</span>
+<span class="nc" id="L104">          System.out.println(&quot;line 75&quot;);</span>
+<span class="nc" id="L105">          serverOut.writeUTF(&quot;26 &quot; + msg);</span>
+        }
+<span class="nc" id="L107">      } catch (IOException | InterruptedException ex) {</span>
+<span class="nc" id="L108">        System.out.println(&quot;Error in the server: &quot; + ex.getMessage());</span>
+<span class="nc" id="L109">        ex.printStackTrace();</span>
+<span class="nc" id="L110">        clientSocket.close();</span>
+<span class="nc" id="L111">      }</span>
+    }
+  }
+}
+
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.4.201905082037</span></div></body></html>

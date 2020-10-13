@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KnockKnockProtocol.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Assignment 6</a> &gt; <a href="index.source.html" class="el_package">multiThreadChatRoom</a> &gt; <span class="el_source">KnockKnockProtocol.java</span></div><h1>KnockKnockProtocol.java</h1><pre class="source lang-java linenums">package multiThreadChatRoom;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * The type Knock knock protocol.
+ */
+<span class="fc" id="L9">public class KnockKnockProtocol {</span>
+
+  private static final int CONNECT_RESPONSE = 20;
+  private static final int DISCONNECT_MESSAGE = 21;
+  private static final int QUERY_CONNECTED_USERS = 22;
+  private static final int QUERY_USER_RESPONSE = 23;
+  private static final int BROADCAST_MESSAGE = 24;
+  private static final int DIRECT_MESSAGE = 25;
+  private static final int FAILED_MESSAGE = 26;
+  private static final int SEND_INSULT = 27;
+  private static final int DISCONNECT_RESPONSE = 28;
+  private static final int BROADCAST_MESSAGE_RESPONSE = 29;
+  private static final int DIRECT_MESSAGE_RESPONSE = 30;
+
+  /**
+   * Process input string.
+   *
+   * @param input the input
+   * @return the string
+   */
+  public String processInput(final String input) {
+<span class="fc" id="L30">    String output = &quot;&quot;;</span>
+
+    //connect response (sample input: 20 true)
+<span class="fc bfc" id="L33" title="All 2 branches covered.">    if (input.substring(0, 2).equals(Integer.toString(CONNECT_RESPONSE))) {</span>
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">      if (input.contains(&quot;true&quot;)) {</span>
+<span class="fc" id="L35">        output = &quot;You are connected to the system successfully, please start to chat with others and have fun :)&quot;;</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">      } else if (input.contains(&quot;false&quot;)) {</span>
+<span class="nc" id="L37">        output = &quot;Unfortunately, the connection fails, please retry later. &quot;;</span>
+      }
+    }
+
+    //disconnected message (sample input: 4 jack logoff, output: 21 4 jack)
+<span class="fc bfc" id="L42" title="All 2 branches covered.">    if (input.toLowerCase().contains(&quot;logoff&quot;)) {</span>
+<span class="fc" id="L43">      int endInt = Integer.parseInt(input.substring(0, 1));</span>
+<span class="fc" id="L44">      output = Integer.toString(DISCONNECT_MESSAGE) + &quot; &quot; + input.substring(0, endInt + 2);</span>
+    }
+
+    //disconnected response (sample input: 28 true)
+<span class="fc bfc" id="L48" title="All 2 branches covered.">    if (input.substring(0, 2).equals(Integer.toString(DISCONNECT_RESPONSE))) {</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">      if (input.contains(&quot;true&quot;)) {</span>
+<span class="fc" id="L50">        output = &quot;You are disconnected to the system successfully, see you next time :)&quot;;</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">      } else if (input.contains(&quot;false&quot;)) {</span>
+<span class="nc" id="L52">        output = &quot;Unfortunately, the disconnection fails, please retry later. &quot;;</span>
+      }
+    }
+
+    //query connected users (sample input: 4 jack who, output: 22 4 jack)
+<span class="fc bfc" id="L57" title="All 2 branches covered.">    if (input.toLowerCase().contains(&quot;who&quot;)) {</span>
+<span class="fc" id="L58">      int endInt = Integer.parseInt(input.substring(0, 1));</span>
+<span class="fc" id="L59">      output = Integer.toString(QUERY_CONNECTED_USERS) + &quot; &quot; + input.substring(0, endInt + 2);</span>
+    }
+
+    //query user response (sample input: 23 msg)
+<span class="fc bfc" id="L63" title="All 2 branches covered.">    if (input.substring(0, 2).equals(Integer.toString(QUERY_USER_RESPONSE))) {</span>
+<span class="fc" id="L64">      output = input.substring(3);</span>
+    }
+
+    //broadcast message (sample input: 4 jack @all message_to_all)
+    //(sample output 24 4 jack 14 message_to_all)
+<span class="fc bfc" id="L69" title="All 2 branches covered.">    if (input.toLowerCase().contains(&quot;@all&quot;)) {</span>
+<span class="fc" id="L70">      int nameSize = Integer.parseInt(input.substring(0, 1));</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">      if (input.length() &gt; 7 + nameSize) {</span>
+<span class="fc" id="L72">        String msgBro = input.substring(8 + nameSize);</span>
+<span class="fc" id="L73">        int msgSize = msgBro.length();</span>
+<span class="fc" id="L74">        output = Integer.toString(BROADCAST_MESSAGE) + &quot; &quot; + input.substring(0, nameSize + 2) + &quot; &quot;</span>
+<span class="fc" id="L75">            + Integer.toString(msgSize) + &quot; &quot; + msgBro;</span>
+<span class="fc" id="L76">      } else {</span>
+<span class="fc" id="L77">        String reminder = &quot;the user does not send any message to you.&quot;;</span>
+<span class="fc" id="L78">        output = Integer.toString(BROADCAST_MESSAGE) + &quot; &quot; + input.substring(0, nameSize + 2)</span>
+<span class="fc" id="L79">            + &quot; &quot; + Integer.toString(reminder.length()) + &quot; &quot; + reminder;</span>
+      }
+    }
+
+    //broadcast message response (sample input: 29 4 jack msg)
+    //(sample output: jack to all: msg)
+<span class="fc bfc" id="L85" title="All 2 branches covered.">    if (input.substring(0, 2).equals(Integer.toString(BROADCAST_MESSAGE_RESPONSE))) {</span>
+<span class="fc" id="L86">      int firstNameSize = Integer.parseInt(input.substring(3, 4));</span>
+<span class="fc" id="L87">      output =</span>
+<span class="fc" id="L88">          input.substring(5, firstNameSize + 5) + &quot; to all: &quot; + input.substring(firstNameSize + 6);</span>
+    }
+
+    //direct message (sample input: 4 jack @rose message_to_rose)
+    //(sample output = 25 4 jack 4 rose 15 message_to_rose)
+<span class="fc bfc" id="L93" title="All 4 branches covered.">    if (!input.toLowerCase().contains(&quot;@all&quot;) &amp;&amp; input.contains(&quot;@&quot;)) {</span>
+<span class="fc" id="L94">      int firstNameSize = Integer.parseInt(input.substring(0, 1));</span>
+<span class="fc" id="L95">      Pattern pattern = Pattern.compile(&quot;@[A-Za-z]*&quot;);</span>
+<span class="fc" id="L96">      Matcher matcher = pattern.matcher(input);</span>
+<span class="fc" id="L97">      String secondName = &quot;&quot;;</span>
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">      if (matcher.find()) {</span>
+<span class="fc" id="L99">        secondName = matcher.group(0).substring(1);</span>
+      }
+<span class="fc bfc" id="L101" title="All 2 branches covered.">      if (input.length() &gt; 4 + firstNameSize + secondName.length()) {</span>
+<span class="fc" id="L102">        String msgDir = input.substring(5 + firstNameSize + secondName.length());</span>
+<span class="fc" id="L103">        output =</span>
+<span class="fc" id="L104">            Integer.toString(DIRECT_MESSAGE) + &quot; &quot; + input.substring(0, firstNameSize + 2) + &quot; &quot;</span>
+<span class="fc" id="L105">                + Integer.toString(secondName.length()) + &quot; &quot; + secondName + &quot; &quot; + msgDir.length()</span>
+                + &quot; &quot;
+                + msgDir;
+<span class="fc" id="L108">      } else {</span>
+<span class="fc" id="L109">        String reminderP = &quot;the user does not send any message to you.&quot;;</span>
+<span class="fc" id="L110">        output =</span>
+<span class="fc" id="L111">            Integer.toString(DIRECT_MESSAGE) + &quot; &quot; + input.substring(0, firstNameSize + 2) + &quot; &quot;</span>
+<span class="fc" id="L112">                + Integer.toString(secondName.length()) + &quot; &quot; + secondName + &quot; &quot; + Integer</span>
+<span class="fc" id="L113">                .toString(reminderP.length()) + &quot; &quot; + reminderP;</span>
+      }
+    }
+
+    //direct message response (sample input: 30 4 jack msg)
+    //(sample output: jack to you in private: msg)
+<span class="fc bfc" id="L119" title="All 2 branches covered.">    if (input.substring(0, 2).equals(Integer.toString(DIRECT_MESSAGE_RESPONSE))) {</span>
+<span class="fc" id="L120">      int firstNameSize = Integer.parseInt(input.substring(3, 4));</span>
+<span class="fc" id="L121">      output = input.substring(5, firstNameSize + 5) + &quot; to you in private: &quot; + input</span>
+<span class="fc" id="L122">          .substring(firstNameSize + 6);</span>
+    }
+
+    //failed message (sample input: 26 msg)
+<span class="fc bfc" id="L126" title="All 2 branches covered.">    if (input.substring(0, 2).equals(Integer.toString(FAILED_MESSAGE))) {</span>
+<span class="fc" id="L127">      output = input.substring(3);</span>
+    }
+
+    //send insult (sample input: 4 jack !!rose, output: 27 4 jack 4 rose)
+<span class="fc bfc" id="L131" title="All 2 branches covered.">    if (input.contains(&quot;!!&quot;)) {</span>
+<span class="fc" id="L132">      Pattern pattern = Pattern.compile(&quot;!![A-Za-z]*&quot;);</span>
+<span class="fc" id="L133">      Matcher matcher = pattern.matcher(input);</span>
+<span class="fc" id="L134">      String secondName = &quot;&quot;;</span>
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">      if (matcher.find()) {</span>
+<span class="fc" id="L136">        secondName = matcher.group(0).substring(2);</span>
+      }
+<span class="fc" id="L138">      int firstNameSize = Integer.parseInt(input.substring(0, 1));</span>
+
+<span class="fc" id="L140">      output = Integer.toString(SEND_INSULT) + &quot; &quot; + input.substring(0, firstNameSize + 2) + &quot; &quot;</span>
+<span class="fc" id="L141">          + Integer.toString(secondName.length()) + &quot; &quot; + secondName;</span>
+    }
+
+<span class="fc" id="L144">    return output;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.4.201905082037</span></div></body></html>

@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"multiThreadChatRoom","l":"Client"},{"p":"multiThreadChatRoom","l":"GenerateInsult"},{"p":"multiThreadChatRoom","l":"KnockKnockProtocol"},{"p":"multiThreadChatRoom","l":"Server"}]

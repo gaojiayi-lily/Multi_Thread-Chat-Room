@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Client.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Assignment 6</a> &gt; <a href="index.source.html" class="el_package">multiThreadChatRoom</a> &gt; <span class="el_source">Client.java</span></div><h1>Client.java</h1><pre class="source lang-java linenums">package multiThreadChatRoom;
+
+import java.net.*;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+
+/**
+ * The type Client. The Client that can be run as a console
+ */
+public class Client {
+
+  private static InetAddress ip;
+  private String userName;
+  private int portNumber;
+  private static final int CONNECT_MESSAGE = 19;
+
+  /**
+   * Instantiates a new Client.
+   *
+   * @param ip         the ip
+   * @param portNumber the port number
+   * @param userName   the user name
+   * @throws IOException the io exception
+   */
+<span class="nc" id="L27">  Client(InetAddress ip, int portNumber, String userName) throws IOException {</span>
+<span class="nc" id="L28">    this.ip = ip;</span>
+<span class="nc" id="L29">    this.portNumber = portNumber;</span>
+<span class="nc" id="L30">    this.userName = userName;</span>
+<span class="nc" id="L31">  }</span>
+
+  /**
+   * Gets user name.
+   *
+   * @return the user name
+   */
+  public String getUserName() {
+<span class="nc" id="L39">    return userName;</span>
+  }
+
+  /**
+   * The entry point of application. To start the Client in console mode use one of the following
+   * command.
+   * &lt;p&gt;
+   * Java Client username; java Client username portNumber; java Client username portNumber
+   * serverAddress at the console prompt.
+   * &lt;p&gt;
+   * If the portNumber is not specified 2222 is used, if the serverAddress is not specified
+   * &quot;localHost&quot; is used, if the username is not specified &quot;Anonymous&quot; is used.
+   *
+   * @param args the input arguments
+   * @throws UnknownHostException the unknown host exception
+   * @throws IOException          the io exception
+   * @throws InterruptedException the interrupted exception
+   */
+  public static void main(String[] args)
+      throws UnknownHostException, IOException, InterruptedException {
+    // default values if not entered
+<span class="nc" id="L60">    int portNumber = 2222;</span>
+<span class="nc" id="L61">    String serverAddress = &quot;localhost&quot;;</span>
+<span class="nc" id="L62">    String userName = &quot;Anonymous&quot;;</span>
+<span class="nc" id="L63">    Scanner scan = new Scanner(System.in);</span>
+    String fromServer;
+
+<span class="nc" id="L66">    InetAddress ip = InetAddress.getByName(serverAddress);</span>
+<span class="nc" id="L67">    Socket clientSocket = new Socket(ip, portNumber);</span>
+<span class="nc" id="L68">    DataInputStream inputStream = new DataInputStream(clientSocket.getInputStream());</span>
+<span class="nc" id="L69">    DataOutputStream outputStream = new DataOutputStream(clientSocket.getOutputStream());</span>
+
+<span class="nc" id="L71">    System.out.println(&quot;Enter the username &amp;&amp; optional [portNumber] [serverAddress]: &quot;);</span>
+<span class="nc" id="L72">    userName = scan.nextLine();</span>
+
+    // different case according to the length of the arguments.
+<span class="nc bnc" id="L75" title="All 5 branches missed.">    switch (args.length) {</span>
+      case 3:
+        // for &gt; javac Client username portNumber serverAddr
+<span class="nc" id="L78">        serverAddress = args[2];</span>
+      case 2:
+        // for &gt; javac Client username portNumber
+        try {
+<span class="nc" id="L82">          portNumber = Integer.parseInt(args[1]);</span>
+<span class="nc" id="L83">        } catch (Exception e) {</span>
+<span class="nc" id="L84">          System.out.println(&quot;Invalid port number.&quot;);</span>
+<span class="nc" id="L85">          System.out.println(&quot;Usage is: &gt; java Client [username] [portNumber] [serverAddress]&quot;);</span>
+<span class="nc" id="L86">          return;</span>
+<span class="nc" id="L87">        }</span>
+      case 1:
+        // for &gt; javac Client username
+<span class="nc" id="L90">        userName = args[0];</span>
+      case 0:
+        // for &gt; java Client
+<span class="nc" id="L93">        break;</span>
+      // if number of arguments are invalid
+      default:
+<span class="nc" id="L96">        System.out.println(&quot;Usage is: &gt; java Client [username] [portNumber] [serverAddress]&quot;);</span>
+<span class="nc" id="L97">        return;</span>
+    }
+
+    // create the Client object
+<span class="nc" id="L101">    Client client = new Client(ip, portNumber, userName);</span>
+<span class="nc" id="L102">    outputStream</span>
+<span class="nc" id="L103">        .writeUTF(</span>
+<span class="nc" id="L104">            Integer.toString(CONNECT_MESSAGE) + &quot; &quot; + Integer.toString(userName.length()) + &quot; &quot;</span>
+                + userName);
+
+<span class="nc bnc" id="L107" title="All 2 branches missed.">    while ((fromServer = inputStream.readUTF()) == null) {</span>
+<span class="nc" id="L108">      TimeUnit.SECONDS.sleep(1);</span>
+    }
+
+<span class="nc bnc" id="L111" title="All 2 branches missed.">    if (fromServer.contains(&quot;20 true&quot;)) {</span>
+<span class="nc" id="L112">      ArrayList&lt;String&gt; fromServerMsg = Server.processInput(fromServer);</span>
+<span class="nc" id="L113">      String msg1 = &quot;&quot;;</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">      for (int i = 2; i &lt; fromServerMsg.size(); i++) {</span>
+<span class="nc" id="L115">        msg1 = msg1 + fromServerMsg.get(i) + &quot; &quot;;</span>
+      }
+<span class="nc" id="L117">      System.out.println(&quot;\nHello.! Welcome to the Multi-Thread Chat Room.&quot;);</span>
+<span class="nc" id="L118">      System.out.println(msg1);</span>
+<span class="nc" id="L119">      System.out.println(&quot;\nHere are the instructions:&quot;);</span>
+<span class="nc" id="L120">      System.out.println(&quot;Type 'logoff' if you want to disconnect from the server.&quot;);</span>
+<span class="nc" id="L121">      System.out.println(&quot;Type 'who' to see the list of active clients.&quot;);</span>
+<span class="nc" id="L122">      System.out.println(&quot;Type '@user_specified' to send message to a specified user.&quot;);</span>
+<span class="nc" id="L123">      System.out.println(&quot;Type '@all' to broadcast to all users connected.&quot;);</span>
+<span class="nc" id="L124">      System.out.println(</span>
+          &quot;Type '!!user_specified' to send auto-generated insult message to a specified user.&quot;);
+
+      // a thread that send messages to the server
+<span class="nc" id="L128">      Thread sendMessage = new Thread(() -&gt; {</span>
+        while (true) {
+<span class="nc" id="L130">          String inputLine = client.getUserName().length() + &quot; &quot; + client.getUserName() +</span>
+<span class="nc" id="L131">              &quot; &quot; + scan.nextLine();</span>
+<span class="nc" id="L132">          KnockKnockProtocol kkp = new KnockKnockProtocol();</span>
+<span class="nc" id="L133">          String outputLine = kkp.processInput(inputLine);</span>
+          try {
+<span class="nc" id="L135">            outputStream.writeUTF(outputLine);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            if (inputLine.equalsIgnoreCase(&quot;logoff&quot;)) {</span>
+<span class="nc" id="L137">              return;</span>
+            }
+<span class="nc" id="L139">          } catch (IOException e) {</span>
+<span class="nc" id="L140">            System.out.println(&quot;Server has closed the connection: &quot; + e);</span>
+<span class="nc" id="L141">          }</span>
+<span class="nc" id="L142">        }</span>
+      });
+
+      // a thread that waits for the message from the server
+<span class="nc" id="L146">      Thread readMessage = new Thread(() -&gt; {</span>
+        while (true) {
+          try {
+            // read the message form the input data stream
+<span class="nc" id="L150">            String msg = inputStream.readUTF();</span>
+<span class="nc" id="L151">            KnockKnockProtocol kkp = new KnockKnockProtocol();</span>
+<span class="nc" id="L152">            String msgOutput = kkp.processInput(msg);</span>
+<span class="nc" id="L153">            System.out.println(msgOutput);</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">            if (msg.contains(&quot;28 true&quot;)) {</span>
+<span class="nc" id="L155">              break;</span>
+            }
+<span class="nc" id="L157">          } catch (IOException e) {</span>
+<span class="nc" id="L158">            System.out.println(&quot;Server has closed the connection: &quot; + e);</span>
+<span class="nc" id="L159">          }</span>
+        }
+<span class="nc" id="L161">      });</span>
+
+      // creates the Thread to read &amp;&amp; write from the server
+<span class="nc" id="L164">      readMessage.start();</span>
+<span class="nc" id="L165">      sendMessage.start();</span>
+
+<span class="nc" id="L167">    } else {</span>
+<span class="nc" id="L168">      System.out.println(&quot;The connection is not successful, please try again later :)&quot;);</span>
+    }
+<span class="nc" id="L170">  }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.4.201905082037</span></div></body></html>

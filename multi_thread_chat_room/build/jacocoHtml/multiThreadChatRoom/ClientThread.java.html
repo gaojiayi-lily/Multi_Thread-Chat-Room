@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClientThread.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Assignment 6</a> &gt; <a href="index.source.html" class="el_package">multiThreadChatRoom</a> &gt; <span class="el_source">ClientThread.java</span></div><h1>ClientThread.java</h1><pre class="source lang-java linenums">package multiThreadChatRoom;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * The type Client thread.
+ */
+class ClientThread implements Runnable {
+
+  private Socket clientSocket;
+  /**
+   * The Server in.
+   */
+  final DataInputStream serverIn;
+  /**
+   * The Server out.
+   */
+  final DataOutputStream serverOut;
+  private ConcurrentHashMap&lt;String, ClientThread&gt; clientList;
+  private int chatRmNum;
+  private String clientName;
+
+  /**
+   * Instantiates a new Client thread.
+   *
+   * @param clientSocket the client socket
+   * @param clientName   the client name
+   * @param serverIn     the server in
+   * @param serverOut    the server out
+   */
+<span class="nc" id="L36">  public ClientThread(Socket clientSocket, String clientName, DataInputStream serverIn, DataOutputStream serverOut) {</span>
+<span class="nc" id="L37">    this.clientSocket = clientSocket;</span>
+<span class="nc" id="L38">    this.clientName = clientName;</span>
+<span class="nc" id="L39">    this.serverIn = serverIn;</span>
+<span class="nc" id="L40">    this.serverOut = serverOut;</span>
+<span class="nc" id="L41">    this.clientList = Server.clientList;</span>
+<span class="nc" id="L42">  }</span>
+
+  @Override
+  public void run() {
+    String received;
+    ArrayList&lt;String&gt; fromClient;
+    String clientName;
+    String identifier;
+<span class="nc" id="L50">    String message = &quot;&quot;;</span>
+<span class="nc" id="L51">    String systemString = &quot;&quot;;</span>
+
+    while (true) {
+      try {
+        //System.out.println(&quot;thread is running&quot;);
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        while ((received = serverIn.readUTF())!= null) {</span>
+<span class="nc" id="L57">          chatRmNum = Server.clientList.size();</span>
+          //System.out.println(received);
+<span class="nc" id="L59">          fromClient = Server.processInput(received);</span>
+<span class="nc" id="L60">          identifier = fromClient.get(0);</span>
+<span class="nc" id="L61">          clientName = fromClient.get(2);</span>
+
+<span class="nc bnc" id="L63" title="All 7 branches missed.">          switch (identifier) {</span>
+            // Connect request
+            case &quot;19&quot;:
+<span class="nc bnc" id="L66" title="All 2 branches missed.">              if (clientList.containsKey(clientName)) {</span>
+<span class="nc" id="L67">                message = clientName + &quot; already connected to server.&quot;;</span>
+<span class="nc" id="L68">                serverOut.writeUTF(&quot;20 true&quot; + message);</span>
+              } else {
+<span class="nc" id="L70">                message = &quot;ERROR: User &quot; + clientName + &quot; doesn't connect to server.&quot;;</span>
+<span class="nc" id="L71">                serverOut.writeUTF(&quot;20 false&quot; + message);</span>
+              }
+<span class="nc" id="L73">              break;</span>
+
+            // Disconnect request
+            case &quot;21&quot;:
+<span class="nc bnc" id="L77" title="All 2 branches missed.">              if (clientList.containsKey(clientName)) {</span>
+<span class="nc" id="L78">                message = &quot;You are no longer connected.&quot;;</span>
+<span class="nc" id="L79">                serverOut.writeUTF(&quot;28 true &quot; + message);</span>
+<span class="nc" id="L80">                clientList.remove(clientName, clientList.get(clientName));</span>
+<span class="nc" id="L81">                systemString = clientName + &quot; logoff&quot;;</span>
+<span class="nc" id="L82">                System.out.println(systemString);</span>
+<span class="nc" id="L83">                serverIn.close();</span>
+<span class="nc" id="L84">                serverOut.close();</span>
+<span class="nc" id="L85">                clientSocket.close();</span>
+<span class="nc" id="L86">                return;</span>
+              } else {
+<span class="nc" id="L88">                message = &quot;ERROR: Disconnect can't happen on unconnected user &quot; + clientName;</span>
+<span class="nc" id="L89">                serverOut.writeUTF(&quot;28 false &quot; + message);</span>
+              }
+<span class="nc" id="L91">              break;</span>
+
+            // Query user request
+            case &quot;22&quot;:
+<span class="nc bnc" id="L95" title="All 2 branches missed.">              if (clientList.containsKey(clientName)) {</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">                if (chatRmNum == 1) {</span>
+<span class="nc" id="L97">                  message = &quot;No other clients are connected now.&quot;;</span>
+<span class="nc" id="L98">                  serverOut.writeUTF(&quot;23 &quot; + message);</span>
+<span class="nc" id="L99">                  systemString = clientName + &quot; ask who&quot;;</span>
+<span class="nc" id="L100">                  System.out.println(systemString);</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">                } else if (chatRmNum &gt; 1) {</span>
+<span class="nc" id="L102">                  message = &quot;&quot;;</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">                  for (String key : clientList.keySet()) {</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">                    if (!key.equals(clientName)) {</span>
+<span class="nc" id="L105">                      message = message + key + &quot;  &quot; ;</span>
+                    }
+<span class="nc" id="L107">                  }</span>
+<span class="nc" id="L108">                  message = &quot;Current connected users are: &quot; + message;</span>
+<span class="nc" id="L109">                  serverOut.writeUTF(&quot;23 &quot; + message);</span>
+                }
+              } else {
+<span class="nc" id="L112">                message =</span>
+                    &quot;ERROR: User &quot; + clientName + &quot; doesn't connect to server.&quot;;
+<span class="nc" id="L114">                serverOut.writeUTF(&quot;20 false &quot; + message);</span>
+              }
+<span class="nc" id="L116">              break;</span>
+
+            // Broadcast msg request. input eg: 24 4 jack 14 message_to_all. output eg: 29 4 jack msg
+            case &quot;24&quot;:
+<span class="nc bnc" id="L120" title="All 2 branches missed.">              if (clientList.containsKey(clientName)) {</span>
+<span class="nc" id="L121">                message = &quot;&quot;;</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">                for (int i = 4; i &lt; fromClient.size(); i++) {</span>
+<span class="nc" id="L123">                  message = message + fromClient.get(i) + &quot; &quot;;</span>
+                }
+<span class="nc bnc" id="L125" title="All 2 branches missed.">                for (String key : clientList.keySet()) {</span>
+<span class="nc" id="L126">                  clientList.get(key).serverOut</span>
+<span class="nc" id="L127">                      .writeUTF(&quot;29 &quot; + clientName.length() + &quot; &quot; + clientName + &quot; &quot; + message);</span>
+<span class="nc" id="L128">                }</span>
+<span class="nc" id="L129">                systemString = &quot;Broadcast from &quot; + clientName;</span>
+<span class="nc" id="L130">                System.out.println(systemString);</span>
+              } else {
+<span class="nc" id="L132">                message = &quot;ERROR: User &quot; + clientName + &quot; doesn't connect to server.&quot;;</span>
+<span class="nc" id="L133">                serverOut.writeUTF(&quot;26 &quot; + message);</span>
+              }
+<span class="nc" id="L135">              break;</span>
+
+            // Direct msg request. input eg: 25 4 jack 4 rose 15 message_to_rose. output eg: 30 4 jack msg
+            case &quot;25&quot;:
+<span class="nc" id="L139">              String receiptClient = fromClient.get(4);</span>
+<span class="nc" id="L140">              message = &quot;&quot;;</span>
+<span class="nc bnc" id="L141" title="All 4 branches missed.">              if (clientList.containsKey(receiptClient) &amp;&amp; clientList.containsKey(clientName)) {</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">                for (int i = 6; i &lt; fromClient.size(); i++) {</span>
+<span class="nc" id="L143">                  message = message + fromClient.get(i) + &quot; &quot;;</span>
+                }
+<span class="nc" id="L145">                clientList.get(receiptClient).serverOut</span>
+<span class="nc" id="L146">                    .writeUTF(&quot;30 &quot; + clientName.length() + &quot; &quot; + clientName + &quot; &quot; + message);</span>
+<span class="nc" id="L147">                systemString = clientName + &quot; sending message to &quot; + receiptClient;</span>
+<span class="nc" id="L148">                System.out.println(systemString);</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">              } else if (!clientList.containsKey(receiptClient)) {</span>
+<span class="nc" id="L150">                message = &quot;ERROR: Message can't be sent to unconnected user &quot; + receiptClient;</span>
+<span class="nc" id="L151">                serverOut.writeUTF(&quot;26 &quot; + message);</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">              } else if (!clientList.containsKey(clientName)) {</span>
+<span class="nc" id="L153">                message = &quot;ERROR: User &quot; + clientName + &quot; doesn't connect to server.&quot;;</span>
+<span class="nc" id="L154">                serverOut.writeUTF(&quot;26 &quot; + message);</span>
+              }
+              break;
+
+            // Insult msg request. input eg: 27 4 jack 4 rose. output eg: 29 4 jack msg
+            case &quot;27&quot;:
+<span class="nc" id="L160">              String insultReceiptClient = fromClient.get(4);</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">              if (clientList.containsKey(clientName)) {</span>
+
+<span class="nc" id="L163">                String insult = GenerateInsult.readGrammar(&quot;insult_grammar.json&quot;).get(0);</span>
+
+<span class="nc bnc" id="L165" title="All 2 branches missed.">                for (String key : clientList.keySet()) {</span>
+<span class="nc" id="L166">                  clientList.get(key).serverOut</span>
+<span class="nc" id="L167">                      .writeUTF(&quot;29 &quot; + clientName.length() + &quot; &quot; + clientName + &quot; &quot;</span>
+                          + &quot;--&gt;&quot; + insultReceiptClient + &quot;: &quot; + insult);
+<span class="nc" id="L169">                }</span>
+<span class="nc" id="L170">                systemString = clientName + &quot; broadcasting Insult to &quot; + insultReceiptClient;</span>
+<span class="nc" id="L171">                System.out.println(systemString);</span>
+<span class="nc" id="L172">              } else {</span>
+<span class="nc" id="L173">                message = &quot;User &quot; + clientName + &quot; doesn't connect to server.&quot;;</span>
+<span class="nc" id="L174">                serverOut.writeUTF(&quot;26 &quot; + message);</span>
+              }
+<span class="nc" id="L176">              break;</span>
+
+            // Any other input cases, response fail msg
+            default:
+<span class="nc" id="L180">              message = &quot;Input can not be correctly read. Please try again.&quot;;</span>
+<span class="nc" id="L181">              serverOut.writeUTF(&quot;26 &quot; + message);</span>
+<span class="nc" id="L182">              systemString = &quot;Wrong input from &quot; + clientName;</span>
+<span class="nc" id="L183">              System.out.println(systemString);</span>
+          }
+
+        }
+<span class="nc" id="L187">      } catch (IOException ex) {</span>
+<span class="nc" id="L188">        System.out.println(&quot;Error in the server: &quot; + ex.getMessage());</span>
+<span class="nc" id="L189">        ex.printStackTrace();</span>
+<span class="nc" id="L190">      }</span>
+    }
+  }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.4.201905082037</span></div></body></html>

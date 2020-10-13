@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="multiThreadChatRoom.KnockKnockProtocolTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2020-04-15T01:32:05" hostname="Jiayi-GAO-new" time="0.015">
+  <properties/>
+  <testcase name="insultGenerator" classname="multiThreadChatRoom.KnockKnockProtocolTest" time="0.012"/>
+  <testcase name="insultJar" classname="multiThreadChatRoom.KnockKnockProtocolTest" time="0.0"/>
+  <testcase name="processInputException" classname="multiThreadChatRoom.KnockKnockProtocolTest" time="0.001"/>
+  <testcase name="matcher" classname="multiThreadChatRoom.KnockKnockProtocolTest" time="0.0"/>
+  <testcase name="processInput" classname="multiThreadChatRoom.KnockKnockProtocolTest" time="0.001"/>
+  <system-out><![CDATA[You reeky offspring of a motherless moron.
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

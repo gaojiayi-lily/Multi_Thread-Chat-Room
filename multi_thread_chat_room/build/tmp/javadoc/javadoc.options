@@ -1,0 +1,10 @@
+-classpath '/Users/user/Desktop/CS5010/Assignment/Assignment 6/build/classes/java/main:/Users/user/Desktop/CS5010/Assignment/Assignment 6/build/resources/main:/Users/user/Documents/gradle-6.0.1/caches/modules-2/files-2.1/com.googlecode.json-simple/json-simple/1.1/5e303a03d04e6788dddfa3655272580ae0fc13bb/json-simple-1.1.jar:/Users/user/Documents/gradle-6.0.1/caches/modules-2/files-2.1/commons-cli/commons-cli/1.4/c51c00206bb913cd8612b24abd9fa98ae89719b1/commons-cli-1.4.jar:/Users/user/Documents/gradle-6.0.1/caches/modules-2/files-2.1/commons-io/commons-io/2.6/815893df5f31da2ece4040fe0a12fd44b577afaf/commons-io-2.6.jar'
+-d '/Users/user/Desktop/CS5010/Assignment/Assignment 6/build/docs/javadoc'
+-doctitle 'Assignment 6 1.0-SNAPSHOT API'
+-quiet 
+-windowtitle 'Assignment 6 1.0-SNAPSHOT API'
+'/Users/user/Desktop/CS5010/Assignment/Assignment 6/src/main/java/multiThreadChatRoom/Client.java'
+'/Users/user/Desktop/CS5010/Assignment/Assignment 6/src/main/java/multiThreadChatRoom/ClientThread.java'
+'/Users/user/Desktop/CS5010/Assignment/Assignment 6/src/main/java/multiThreadChatRoom/GenerateInsult.java'
+'/Users/user/Desktop/CS5010/Assignment/Assignment 6/src/main/java/multiThreadChatRoom/KnockKnockProtocol.java'
+'/Users/user/Desktop/CS5010/Assignment/Assignment 6/src/main/java/multiThreadChatRoom/Server.java'
