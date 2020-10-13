@@ -1,4 +1,4 @@
-Assignment 6 : Chat Room
+Practice project: Chat Room
 
 1. Run Sercer in Intellij (local host)
    waiting until see the msg: "Chat Server is listening on port 2222"
